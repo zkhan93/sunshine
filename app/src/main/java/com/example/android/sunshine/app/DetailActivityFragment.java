@@ -22,7 +22,7 @@ public class DetailActivityFragment extends Fragment {
     private ShareActionProvider mShareActionProvider = null;
     private String mForecastData;
     public static final String TAG = DetailActivity.class.getSimpleName();
-
+    private String FORECAST_SHARE_HASHTAG=" #SunshineApp";
     public DetailActivityFragment() {
     }
 
@@ -50,15 +50,22 @@ public class DetailActivityFragment extends Fragment {
         inflater.inflate(R.menu.detail_fragment, menu);
         MenuItem item = menu.findItem(R.id.action_share);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        setShareIntent(createShareForecastIntent());
     }
-
+    private Intent createShareForecastIntent() {
+                    Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                    shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+                    shareIntent.setType("text/plain");
+                    shareIntent.putExtra(Intent.EXTRA_TEXT,
+                            mForecastData + FORECAST_SHARE_HASHTAG);
+                    return shareIntent;
+        }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_share) {
             Log.d(TAG, "share clicked");
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.putExtra(Intent.EXTRA_TEXT, mForecastData + " #SunshineApp");
+            Intent intent = createShareForecastIntent();
             if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                 startActivity(intent);
                 setShareIntent(intent);
