@@ -1,8 +1,11 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -12,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -28,14 +32,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
+ *
  * Created by Zeeshan Khan on 3/30/2016.
  */
 public class ForecastFragment extends Fragment {
     public static final String TAG = "ForecastFragment";
     private ArrayAdapter<String> adapter = null;
+
 
     public ForecastFragment() {
     }
@@ -50,36 +55,54 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        List<String> sampleData = new ArrayList<>();
-        sampleData.add("Today-Sunny-88/63");
-        sampleData.add("Tomorrow-Sunny-88/63");
-        sampleData.add("Wed-Sunny-88/63");
-        sampleData.add("Today-Sunny-88/63");
-        sampleData.add("Tomorrow-Sunny-88/63");
-        sampleData.add("Wed-Sunny-88/63");
-        adapter = new ArrayAdapter<String>(getActivity(), R.layout
-                .list_item_forcast, R.id.list_item_forecast_textview, sampleData);
-        ((ListView) rootView.findViewById(R.id.listview_forecast)).setAdapter(adapter);
+
+        adapter = new ArrayAdapter<>(getActivity(), R.layout
+                .list_item_forcast, R.id.list_item_forecast_textview, new ArrayList<String>());
+        ListView forecastList = ((ListView) rootView.findViewById(R.id.listview_forecast));
+        forecastList.setAdapter(adapter);
+        forecastList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT, adapter.getItem(position));
+                startActivity(intent);
+            }
+        });
         return rootView;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.forecastfragment, menu);
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
 
-        if (item.getItemId() == R.id.action_refresh) {
-            new FetchWeatherTask().execute(226010);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            updateWeather();
             return true;
         }
         return false;
     }
 
-    public class FetchWeatherTask extends AsyncTask<Integer, Void, String[]> {
+
+
+    private void updateWeather() {
+        SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        new FetchWeatherTask().execute(spf.getString(getString(R.string.pref_location_key),
+                String.valueOf(Constants.WHETHER.PARAMETER_VALUES.LOCATION_ID)));
+    }
+
+    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         String TAG = FetchWeatherTask.class.getSimpleName();
 
         private String getReadableDateString(long time) {
@@ -89,9 +112,17 @@ public class ForecastFragment extends Fragment {
 
         private String formatHighLows(double high, double low) {
             // For presentation, assume the user doesn't care about tenths of a degree.
+            SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String unit = spf.getString(getString(R.string.pref_unit_key), getString(R.string
+                    .pref_unit_metric));
+            if (unit.equals(getString(R.string.pref_unit_imperial))) {
+                high = high * 1.8 + 32;
+                low = low * 1.8 + 32;
+            } else if (!unit.equals(getString(R.string.pref_unit_metric))) {
+                Log.d(TAG, "unit not found");
+            }
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
-
             String highLowStr = roundedHigh + "/" + roundedLow;
             return highLowStr;
         }
@@ -145,7 +176,7 @@ public class ForecastFragment extends Fragment {
         }
 
         @Override
-        protected String[] doInBackground(Integer... postalCode) {
+        protected String[] doInBackground(String... postalCode) {
             String forecastJsonStr = null;
             HttpURLConnection conn = null;
             BufferedReader br = null;
@@ -153,7 +184,7 @@ public class ForecastFragment extends Fragment {
                 String surl = new Uri.Builder().scheme("http")
                         .authority("api.openweathermap.org").appendPath("data").appendPath("2.5")
                         .appendPath("forecast").appendQueryParameter(Constants.WHETHER
-                                .PARAMETERS_KEYS.LOCATION_ID, String.valueOf(postalCode))
+                                .PARAMETERS_KEYS.LOCATION_ID, postalCode[0])
                         .appendQueryParameter(Constants.WHETHER
                                 .PARAMETERS_KEYS.MODE, Constants.WHETHER.PARAMETER_VALUES
                                 .MODE).appendQueryParameter(Constants.WHETHER
@@ -212,7 +243,9 @@ public class ForecastFragment extends Fragment {
         protected void onPostExecute(String[] strings) {
             if (strings == null)
                 return;
-            adapter.addAll(strings);
+            adapter.clear();
+            for (String str : strings)
+                adapter.add(str);
         }
     }
 }

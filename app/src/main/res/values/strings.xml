@@ -5,5 +5,26 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_share">Share</string>
+    <string name="action_view_location">View Location on Map</string>
+    <string name="title_activity_detail">Detailed Forecast</string>
+    <string name="title_activity_settings">Settings</string>
 
+    <string name="pref_location_label">Location</string>
+    <string name="pref_location_key" translatable="false">location</string>
+    <string name="pref_location_default" translatable="false">226010</string>
+
+    <string name="pref_unit_label">Temperature Unit</string>
+    <string name="pref_unit_key" translatable="false">temp_unit</string>
+    <string name="pref_unit_metric" translatable="false">Metric</string>
+    <string name="pref_unit_imperial" translatable="false">Imperial</string>
+
+    <string-array name="pref_unit_entries">
+        <item>Metric</item>
+        <item>Imperial</item>
+    </string-array>
+    <string-array name="pref_unit_values">
+        <item>Metric</item>
+        <item>Imperial</item>
+    </string-array>
 </resources>
