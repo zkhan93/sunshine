@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- This permission is necessary in order for Sunshine to perform network access. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -20,18 +23,18 @@
         <activity
             android:name=".DetailActivity"
             android:label="@string/title_activity_detail"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.android.sunshine.app.MainActivity"/>
+                android:value="com.example.android.sunshine.app.MainActivity" />
         </activity>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".DetailActivity" >
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.android.sunshine.app.DetailActivity" />
+                android:value="com.example.android.sunshine.app.MainActivity" />
         </activity>
     </application>
 
