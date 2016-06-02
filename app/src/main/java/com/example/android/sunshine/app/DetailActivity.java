@@ -118,7 +118,7 @@ public class DetailActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
 
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-            forecastTextView = ((TextView) rootView.findViewById(R.id.detail_text));
+            forecastTextView = ((TextView) rootView.findViewById(R.id.forecastData));
             return rootView;
         }
 
